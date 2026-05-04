@@ -87,7 +87,7 @@ export default function Result() {
           // 🔵 ADMIN / EXAMINER VIEW
           return [
             `Name: ${r.studentId?.name || "N/A"}`,
-            `Roll No: ${r.studentId?.rollNo || "N/A"}`,
+            `Roll No: ${r.studentId?.rollNumber || "N/A"}`,
             `Course: ${r.studentId?.course || "N/A"}`,
             `Marks: ${r.totalMarks || 0}`
           ];
@@ -137,13 +137,21 @@ export default function Result() {
         {/* ===== RESULT LIST ===== */}
         {results.map((r, i) => {
 
-          const percentage = r.totalMarks
-            ? Math.round((r.totalMarks/70) * 100)
-            : r.totalMarks;
+          const role = localStorage.getItem("role");
 
-          let grade = 'C';
-          if (percentage >= 80) grade = 'A';
-          else if (percentage >= 60) grade = 'B';
+          const totalMarks = r.totalMarks || 0;
+          const maxMarks = r.examId?.totalMarks || 70; // your exam total
+
+          const percentage = Math.round((totalMarks / maxMarks) * 100);
+
+          const getGrade = (p) => {
+           if (p >= 75) return "A";
+           if (p >= 60) return "B";
+           if (p >= 40) return "C";
+           return "F";
+          };
+
+          const grade = getGrade(percentage);
 
           return (
             <div className="card" key={r._id}>
@@ -151,16 +159,18 @@ export default function Result() {
               <h3>{r.examId?.title || `Test ${i + 1}`}</h3>
 
               {/* 🔥 ADMIN VIEW → show student name */}
-              {r.studentId ? (
-               <div>
-               <p><strong>Name:</strong> {r.studentId.name}</p>
-               <p><strong>Course:</strong> {r.studentId.course}</p>
-               <p><strong>Roll No:</strong> {r.studentId.rollNo}</p>
-              </div>
-             ) : (
-             <p style={{ color: "red" }}>⚠ Student data not found</p>
-             )}
-
+              {role !== "student" && (
+              r.studentId ? (
+             <div>
+                <p><strong>Name:</strong> {r.studentId.name}</p>
+                <p><strong>Course:</strong> {r.studentId.course}</p>
+                <p><strong>Roll No:</strong> {r.studentId.rollNumber}</p>
+           </div>
+           ) : (
+          <p style={{ color: "red" }}>⚠ Student data not found</p>
+          )
+        )}
+        
               <p>Score: {r.totalMarks || '-'}</p>
               <p>Percentage: {percentage}%</p>
 

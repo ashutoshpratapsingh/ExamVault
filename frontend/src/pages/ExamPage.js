@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
+import { downloadPaper } from "../utils/downloadPaper";
 
 const ExamPage = () => {
   const { id: examId } = useParams();
@@ -330,16 +331,15 @@ const getTimeLeft = () => {
         </p>
       </div>
 
-      <button
-      onClick={() => window.print()}
+     <button onClick={() => downloadPaper(paper)}
       style={{
       position: "absolute",
       right: "20px",
       top: "20px"
-     }}
-    >
-     📥 Download Paper
-    </button>
+      }}
+     >
+      📄 Download Question Paper
+     </button>
 
         <h2 style={{ textAlign: "center" }}>📄 Question Paper</h2>
 

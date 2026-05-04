@@ -6,53 +6,51 @@ import { motion } from 'framer-motion';
 
 export default function Register() {
 
-const [name, setName] = useState("");
-const [email, setEmail] = useState("");
-const [password, setPassword] = useState("");
-const [rollNumber, setRollNumber] = useState("");
-
   const [data, setData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    role: 'student',
-    course: '',
-    rollNo: '',
-    sessionYear: '',
-    phone: ''
-  });
+  name: '',
+  email: '',
+  password: '',
+  role: 'student',
+  course: '',
+  rollNumber: '',   // ✅ ADD HERE
+  sessionYear: '',
+  phone: ''
+});
 
   // ✅ REGISTER FUNCTION
   const register = async () => {
-    console.log("Register clicked 🔥");
+  try {
+    console.log("SENDING:", data);
 
-    try {
-      // 🔹 Basic validation
-      if (!data.name || !data.email || !data.password) {
-        return alert('Please fill required fields ❌');
+    if (!data.name || !data.email || !data.password) {
+      return alert('Please fill required fields ❌');
+    }
+
+    if (data.role === 'student') {
+      if (!data.course || !data.sessionYear || !data.phone) {
+        return alert('Please fill all student details ❌');
       }
+    }
 
-      if (data.role === 'student') {
-        if (!data.course || !data.sessionYear || !data.phone) {
-          return alert('Please fill all student details ❌');
-        }
-      }
-
-      await axios.post("/api/auth/register", {
-      name,
-      email,
-      password,
-      rollNumber
+    await axios.post("http://localhost:5000/api/auth/register", {
+      name: data.name,
+      email: data.email,
+      password: data.password,
+      rollNumber: data.rollNumber,
+      role: data.role,
+      course: data.course,
+      sessionYear: data.sessionYear,
+      phone: data.phone
     });
 
-      alert('Registered Successfully ✅');
-      window.location = '/';
+    alert('Registered Successfully ✅');
+    window.location = '/';
 
-    } catch (err) {
-      console.error(err);
-      alert(err.response?.data?.msg || 'Registration Failed ❌');
-    }
-  };
+  } catch (err) {
+    console.error(err);
+    alert(err.response?.data || 'Registration Failed ❌');
+  }
+};
 
   return (
     <div className="auth-wrapper">
@@ -78,31 +76,42 @@ const [rollNumber, setRollNumber] = useState("");
           <input
             placeholder="Full Name"
             value={data.name}
-            onChange={e => setData({ ...data, name: e.target.value })}
+            onChange={e =>
+            setData(prev => ({ ...prev, name: e.target.value }))
+           }
           />
 
         {data.role === 'student' && (
          <>
           <input
-           type="text"
-           placeholder="Roll Number"
-           value={rollNumber}
-           onChange={(e) => setRollNumber(e.target.value)}
-          />       
+          type="text"
+          placeholder="Roll Number"
+          value={data.rollNumber}
+          onChange={(e) =>
+          setData(prev => ({
+          ...prev,
+          rollNumber: e.target.value
+       }))
+      }
+    />
         </>
         )}
 
           <input
             placeholder="Email Address"
             value={data.email}
-            onChange={e => setData({ ...data, email: e.target.value })}
+            onChange={e =>
+            setData(prev => ({ ...prev, email: e.target.value }))
+           }
           />
 
           <input
             type="password"
             placeholder="Password"
             value={data.password}
-            onChange={e => setData({ ...data, password: e.target.value })}
+            onChange={e =>
+            setData(prev => ({ ...prev, password: e.target.value }))
+           }
           />
 
           {/* 🎓 STUDENT FIELDS */}
@@ -111,19 +120,25 @@ const [rollNumber, setRollNumber] = useState("");
               <input
                 placeholder="Course"
                 value={data.course}
-                onChange={e => setData({ ...data, course: e.target.value })}
+                onChange={e =>
+                setData(prev => ({ ...prev, course: e.target.value }))
+               }
               />
 
               <input
                 placeholder="Session Year"
                 value={data.sessionYear}
-                onChange={e => setData({ ...data, sessionYear: e.target.value })}
+                onChange={e =>
+                setData(prev => ({ ...prev, sessionYear: e.target.value }))
+               }
               />
 
               <input
                 placeholder="Phone Number"
                 value={data.phone}
-                onChange={e => setData({ ...data, phone: e.target.value })}
+                onChange={e =>
+                setData(prev => ({ ...prev, phone: e.target.value }))
+               }
               />
             </>
           )}

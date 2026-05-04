@@ -4,9 +4,11 @@ const router = express.Router();
 const User = require('../models/User');
 const authMiddleware = require('../middleware/auth');
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 
 // ================= REGISTER =================
 router.post('/register', async (req, res) => {
+  console.log("REGISTER BODY:", req.body);
   try {
     const { 
       name, 
@@ -14,7 +16,7 @@ router.post('/register', async (req, res) => {
       password, 
       role,
       course,
-      rollNo,
+      rollNumber,
       sessionYear,
       phone
     } = req.body;
@@ -24,16 +26,18 @@ router.post('/register', async (req, res) => {
       return res.status(400).send('User already exists');
     }
 
+    const bcrypt = require("bcryptjs");
+
     const user = new User({
-      name,
-      email: email.toLowerCase(),
-      password,
-      role,
-      course,
-      rollNo,
-      sessionYear,
-      phone
-    });
+    name,
+    email: email.toLowerCase(),
+    password,   // ✅ plain password only
+    role,
+    course,
+    rollNumber,
+    sessionYear,
+    phone
+  });
 
     await user.save();
 
@@ -59,7 +63,14 @@ router.post('/login', async (req, res) => {
       return res.status(400).send('User not found');
     }
 
-    const valid = await user.comparePassword(password);
+     const valid = await user.comparePassword(password.trim());
+
+     console.log("ENTERED:", password);
+     console.log("STORED:", user.password);
+     console.log("COMPARE RESULT:", await bcrypt.compare(password, user.password));
+     console.log("VALID (method):", valid);
+
+     console.log("VALID:", valid);
 
     if (!valid) {
       return res.status(400).send('Wrong password');
@@ -77,7 +88,7 @@ router.post('/login', async (req, res) => {
         _id: user._id,
         name: user.name,
         email: user.email,
-        rollNo: user.rollNo,
+        rollNumber: user.rollNumber,
         course: user.course,
         sessionYear: user.sessionYear,
         phone: user.phone

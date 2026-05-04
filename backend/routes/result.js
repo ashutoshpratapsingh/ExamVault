@@ -58,7 +58,7 @@ router.get('/', auth, async (req, res) => {
     if (req.user.role === 'admin' || req.user.role === 'examiner') {
       results = await Submission.find({ status: "published" })
         .populate('examId', 'title')
-        .populate('studentId', 'name email rollNo course'); // ✅ VERY IMPORTANT
+        .populate('studentId', 'name email rollNumber course');
     } else {
       results = await Submission.find({
         studentId: req.user.id,

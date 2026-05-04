@@ -9,7 +9,7 @@ export default function Dashboard() {
   const [exams, setExams] = useState([]);
   const [history, setHistory] = useState([]);
   const [profile, setProfile] = useState({});
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState({});
   const [submissions, setSubmissions] = useState([]);
   const [marksMap, setMarksMap] = useState({});
   const [selectedAnswer, setSelectedAnswer] = useState({});
@@ -201,6 +201,10 @@ export default function Dashboard() {
     }
   };
 
+  if (!user) {
+  return <h2>Loading...</h2>;
+}
+
   return (
     <>
       <Navbar />
@@ -218,10 +222,12 @@ export default function Dashboard() {
         {role === "student" && (
           <div className="card">
             <h3>👤 Profile</h3>
-            <p><b>Name:</b> {profile.name}</p>
-            <p><b>Email:</b> {profile.email}</p>
-            <p><b>Course:</b> {profile.course}</p>
-            <p><b>Roll No:</b> {profile.rollNo}</p>
+            <p>Name: {user?.name}</p>
+            <p>Email: {user?.email}</p>
+            <p>Roll No: {user?.rollNumber}</p>
+            <p>Course: {user?.course}</p>
+            <p>Session Year: {user?.sessionYear}</p>
+            <p>Phone: {user?.phone}</p>
           </div>
         )}
 
@@ -229,7 +235,8 @@ export default function Dashboard() {
         {role === "admin" && (
           <div className="card">
             <h3>👨‍💼 Admin Profile</h3>
-            <p>{user?.name}</p>
+            <p>Name: {user?.name}</p>
+            <p>Email: {user?.email}</p>
           </div>
         )}
 
@@ -237,7 +244,8 @@ export default function Dashboard() {
         {role === "examiner" && (
           <div className="card">
             <h3>🧑‍🏫 Examiner Profile</h3>
-            <p>{user?.name}</p>
+            <p>Name: {user?.name}</p>
+            <p>Email: {user?.email}</p>
           </div>
         )}
 
@@ -320,18 +328,25 @@ export default function Dashboard() {
                   }
                 />
 
-                <h4>{sub.studentId?.name}</h4>
-
                 {sub.answers.map((ans, i) => (
-                  <div key={i}>
-                    <b>Q{i + 1}</b>
-                    <p>{ans.answer}</p>
-                  </div>
-                ))}
+                <div key={i} style={{
+                   marginBottom: "15px",
+                   padding: "10px",
+                   border: "1px solid #ccc",
+                   borderRadius: "8px",
+                   background: "#2c3e50",
+                   color: "#fff"
+                }}>
 
-                <p>🤖 AI Marks: {sub.aiMarks || 0}</p>
-                <p>✏ Manual: {marksMap[sub._id] ?? sub.manualMarks ?? 0}</p>
-                <p>🏁 Final: {marksMap[sub._id] ?? sub.manualMarks ?? sub.aiMarks ?? 0}</p>
+                <p><b>Ans. {i + 1}</b></p>
+
+                <p>{ans.answer || "No answer provided"}</p>
+
+              </div>
+            ))}
+                <p>AI Marks: {sub.aiMarks || 0}</p>
+                <p>Manual Marks: {marksMap[sub._id] ?? sub.manualMarks ?? 0}</p>
+                <p>Final Marks: {marksMap[sub._id] ?? sub.manualMarks ?? sub.aiMarks ?? 0}</p>
 
                 <input
                  type="number"

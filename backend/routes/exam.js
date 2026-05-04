@@ -5,6 +5,7 @@ const Exam = require("../models/Exam");
 const Question = require("../models/Question");
 const Submission = require("../models/Submission");
 const auth = require("../middleware/auth");
+const PDFDocument = require("pdfkit");
 
 console.log("🔥 EXAM ROUTE FILE LOADED");
 
@@ -320,7 +321,6 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-// ================= SUBMIT EXAM =================
 router.post("/submit", auth, async (req, res) => {
   try {
     const { examId, answers } = req.body;
@@ -329,20 +329,153 @@ router.post("/submit", auth, async (req, res) => {
       return res.status(400).json({ msg: "Missing data ❌" });
     }
 
+    let evaluatedAnswers = [];
+
+for (let a of answers) {
+  const studentAnswer = a.answer || "";
+  const questionId = a.questionId;
+
+  // ✅ MARKING LOGIC
+  let marks = studentAnswer.length > 20 ? 8 : 4;
+
+  // ✅ FEEDBACK (THIS WAS MISSING OR WRONG)
+  let feedback = "";
+
+  if (marks >= 8) {
+    feedback = "Good answer";
+  } else {
+    feedback = "Needs improvement";
+  }
+
+  // ✅ PUSH WITH FEEDBACK
+  evaluatedAnswers.push({
+    questionId,
+    answer: studentAnswer,
+    marksAwarded: marks,
+    feedback   // 🔥 MUST BE HERE
+  });
+}
+
+    // ✅ SAVE AFTER LOOP
     const submission = new Submission({
-      examId,
       studentId: req.user.id,
-      answers,
-      submittedAt: new Date()
+      examId,
+      answers: evaluatedAnswers
     });
 
     await submission.save();
 
-    res.json({ msg: "Submission saved ✅" });
+    res.json({
+      message: "Evaluation complete",
+      answers: evaluatedAnswers
+    });
 
   } catch (err) {
     console.log("SUBMIT ERROR:", err);
     res.status(500).json({ msg: "Server error ❌" });
+  }
+});
+
+router.post("/download-paper", (req, res) => {
+  try {
+    const { paper } = req.body;
+
+    const doc = new PDFDocument({
+      margin: 50
+    });
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=QuestionPaper.pdf"
+    );
+
+    doc.pipe(res);
+
+    // ================= HEADER =================
+    doc.font("Helvetica-Bold")
+       .fontSize(16)
+       .text("Dayananda Sagar College of Arts, Science and Commerce", {
+         align: "center"
+       });
+
+    doc.moveDown(0.3);
+
+    doc.font("Helvetica")
+       .fontSize(12)
+       .text("KS Layout, Bangalore – 560111", {
+         align: "center"
+       });
+
+    doc.moveDown(1);
+
+    // ================= TITLE =================
+    doc.font("Helvetica-Bold")
+       .fontSize(14)
+       .text("QUESTION PAPER", { align: "center" });
+
+    doc.moveDown(1);
+
+    // ================= DETAILS =================
+    doc.font("Helvetica")
+       .fontSize(12)
+       .text(`Subject: ${paper.title}`);
+
+    doc.text(`Time: ${paper.duration || "3 Hours"}`);
+    doc.text(`Maximum Marks: ${paper.totalMarks || 70}`);
+
+    doc.moveDown(1);
+
+    // ================= PART A =================
+    doc.font("Helvetica-Bold")
+   .text("Part A", { underline: true });
+
+   doc.moveDown(0.3);
+
+   doc.font("Helvetica-Oblique")
+   .text(paper.generatedPaper.partA?.instruction || "Attempt any 6 questions");
+
+   doc.moveDown(0.5); 
+
+    paper.generatedPaper.partA?.questions?.forEach((q, i) => {
+      doc.font("Helvetica")
+         .text(`Q${i + 1}. ${q.question} (${q.marks} Marks)`);
+      doc.moveDown(0.5);
+    });
+
+    // ================= PART B =================
+    doc.moveDown();
+
+    doc.font("Helvetica-Bold")
+   .text("Part B", { underline: true });
+
+   doc.moveDown(0.3);
+
+   doc.font("Helvetica-Oblique")
+   .text(paper.generatedPaper.partB?.instruction || "Attempt any 4 questions");
+
+   doc.moveDown(0.5);
+
+    paper.generatedPaper.partB?.questions?.forEach((q, i) => {
+      doc.font("Helvetica")
+         .text(`Q${i + 9}. ${q.question} (${q.marks} Marks)`);
+      doc.moveDown(0.5);
+    });
+
+    // ================= FOOTER =================
+    doc.moveDown(2);
+
+    doc.fontSize(10)
+       .font("Helvetica-Oblique")
+       .text("This is a digitally generated question paper.", {
+         align: "center"
+       });
+
+    doc.end();
+
+  } catch (err) {
+    console.log("PDF ERROR:", err);
+    res.status(500).send("Error generating PDF");
   }
 });
 

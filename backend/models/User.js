@@ -27,7 +27,9 @@ const schema = new mongoose.Schema({
 
   rollNumber: {
   type: String,
-  required: true
+  required: function () {
+    return this.role === "student";   // ✅ only required for students
+  }
 },
 
   canManageQuestion: {
@@ -47,19 +49,17 @@ phone: String
 
 
 // ✅ NO next() → FIXED
-schema.pre('save', async function() {
-
+schema.pre('save', async function () {
   if (!this.isModified('password')) return;
 
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
-
 });
 
 
 // ================= COMPARE PASSWORD =================
 schema.methods.comparePassword = async function(password) {
-  return await bcrypt.compare(password, this.password);
+  return bcrypt.compare(password, this.password);
 };
 
 

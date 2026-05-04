@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "../App.css";
+import { downloadPaper } from "../utils/downloadPaper";
 
 export default function Admin() {
   // ===== STATE =====
@@ -340,7 +341,9 @@ export default function Admin() {
       )}
     </div>
 
-      <h3>✍️ Add Your Own Question</h3>
+      <h3 style={{ marginTop: "20px" }}>
+        ✍️ Add Your Own Question
+      </h3>
 
      <input
      placeholder="Enter Question"
@@ -350,9 +353,10 @@ export default function Admin() {
 
     <input
     type="number"
+    placeholder="Enter Marks for Question"
     value={marks}
     onChange={(e) => setMarks(e.target.value)}
-   />
+  />
 
    <button onClick={() => {
     setManualQuestions([
@@ -437,14 +441,14 @@ export default function Admin() {
 </div>
 
 <button
-  onClick={() => window.print()}
+  onClick={() => downloadPaper(paper)}
   style={{
     position: "absolute",
     right: "20px",
     top: "20px"
   }}
 >
-  📥 Download Paper
+  📄 Download Paper
 </button>
 
     <h3 style={{ color: "#38bdf8" }}>📘 Part A</h3>

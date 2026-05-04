@@ -144,15 +144,12 @@ router.post("/submit", upload.array("diagrams"), async (req, res) => {
     const submission = new Submission({
     studentId: req.user?.id,
     examId: req.body.examId,
-    answers: answersWithMarks,
+    answers: evaluatedAnswers,
     diagrams: req.files || []
   });
 
 
     await submission.save();
-
-    res.json({ msg: "Submission saved ✅" });
-
 
       console.log("SUBJECT VALUE:", subjectName);
 

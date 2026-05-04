@@ -12,7 +12,9 @@ const SubmissionSchema = new mongoose.Schema({
   answers: [
     {
       questionId: String,
-      answer: String
+      answer: String,
+      marksAwarded: Number,
+      feedback: String
     }
   ],
   aiMarks: Number,

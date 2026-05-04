@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import "../App.css";
+import { downloadPaper } from "../utils/downloadPaper";
 
 export default function ExaminerPanel() {
 
@@ -261,15 +262,15 @@ if (!user) return <h2>Loading...</h2>;
 </div>
 
 <button
-  onClick={() => window.print()}
+  onClick={() => downloadPaper(paper)}
   style={{
     position: "absolute",
     right: "20px",
     top: "20px"
   }}
->
-  📥 Download Paper
-</button>
+ >
+  📄 Download Paper
+ </button>
 
         <h2 style={{ textAlign: "center" }}>📄 Question Paper</h2>
 
